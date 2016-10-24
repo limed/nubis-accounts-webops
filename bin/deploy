@@ -44,6 +44,14 @@ prep () {
 
 }
 
+update () {
+  echo "Running update for $ACCOUNT in $ACCOUNT_DIR"
+  
+  git submodule update --remote --recursive
+  
+  cd $ACCOUNT_DIR && aws-vault exec -n "${ACCOUNT}-bootstrap" -- terraform get -update=true deploy
+}
+
 plan () {
   echo "Running plan for $ACCOUNT in $ACCOUNT_DIR"
   
@@ -115,6 +123,12 @@ case "$1" in
 	shift 2
 	prep
 	status
+	;;
+   update)
+	ACCOUNT=$2
+	shift 2
+	prep
+	update
 	;;
 esac
 
