@@ -85,10 +85,22 @@ taint_admins () {
   done
 }
 
+accounts () {
+  ACCOUNTS=$(cd $ACCOUNTS_DIR && ls -1)
+  echo "$ACCOUNTS"
+}
+
+help () {
+ echo "Usage: $0 [plan|apply|init|admins|taint-admin-access-keys|status|update|help] account-name"
+}
+
 hash aws 2>/dev/null || message_print CRITICAL "Please install the AWS CLI API to use this build tool. https://aws.amazon.com/cli/"
 hash terraform 2>/dev/null || message_print CRITICAL "Please install packer to use this build tool. https://terraform.io/"
 
 case "$1" in
+   accounts)
+        accounts
+   ;;
    plan)
 	ACCOUNT=$2
 	shift 2
@@ -130,5 +142,8 @@ case "$1" in
 	prep
 	update
 	;;
+    *)
+        help
+        ;;
 esac
 
