@@ -2,7 +2,11 @@
 
 STATE_REGION=eu-west-1
 
-ACCOUNTS_DIR=$(readlink -f "$(dirname "$(readlink -f "$0")")/../accounts")
+if [ "$(uname)" == "Darwin" ]; then
+  ACCOUNTS_DIR=$(cd "$(dirname "$0")/../accounts" && pwd)
+else
+  ACCOUNTS_DIR=$(readlink -f "$(dirname "$(readlink -f "$0")")/../accounts")
+fi
 
 prep () {
   ACCOUNT_DIR="$ACCOUNTS_DIR/$ACCOUNT"
@@ -14,8 +18,8 @@ prep () {
   
   TF_DIR="$ACCOUNT_DIR/.terraform"
   
-  if [ ! -d "$TF_DIR" ]; then
-    cd $ACCOUNT_DIR && terraform get deploy
+  if [ ! -d "$TF_DIR/modules" ]; then
+    cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-bootstrap" -- terraform get deploy
   fi
   
   STATE_BUCKET=$(aws-vault exec "${ACCOUNT}-bootstrap" -- aws --region $STATE_REGION s3 ls | awk {'print $3'}  | grep nubis-deploy | head)
