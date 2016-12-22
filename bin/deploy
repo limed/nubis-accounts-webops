@@ -89,6 +89,16 @@ taint_admins () {
   done
 }
 
+taint_lambda () {
+  echo "Tainting lambda for $ACCOUNT in $ACCOUNT_DIR"
+
+  for lambda in $(cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-bootstrap" -- terraform  show | grep -E '\.(aws_lambda_function|aws_lambda_permission)\.' | cut -d: -f1 | cut -d. -f2- ); do
+    module=$(echo "$lambda" | perl -pe's/^(.*)\.(aws_lambda_(function|permission)\..*)/$1/')
+    resource=$(echo "$lambda" | perl -pe's/^(.*)\.(aws_lambda_(function|permission)\..*)/$2/')
+    cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-bootstrap" -- terraform taint -module=$module $resource
+  done
+}
+
 accounts () {
   ACCOUNTS=$(cd $ACCOUNTS_DIR && ls -1)
   echo "$ACCOUNTS"
@@ -133,6 +143,12 @@ case "$1" in
 	shift 2
 	prep
 	taint_admins
+	;;
+   taint-lambda)
+        ACCOUNT=$2
+	shift 2
+	prep
+	taint_lambda
 	;;
    status)
 	ACCOUNT=$2
