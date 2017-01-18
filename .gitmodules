@@ -8,5 +8,8 @@
 	path = accounts/virtual-redirects/deploy
 	url = https://github.com/nubisproject/nubis-deploy.git
 [submodule "accounts/appsvcs-pastebin/deploy"]
-	path = accounts/appsvcs-pastebin/deploy
+    path = accounts/appsvcs-pastebin/deploy
+	url = http://github.com/nubisproject/nubis-deploy.git
+[submodule "accounts/appsvcs-etherpad/deploy"]
+	path = accounts/appsvcs-etherpad/deploy
 	url = http://github.com/nubisproject/nubis-deploy.git
