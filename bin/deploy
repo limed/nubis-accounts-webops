@@ -10,67 +10,67 @@ fi
 
 prep () {
   ACCOUNT_DIR="$ACCOUNTS_DIR/$ACCOUNT"
-  
+
   if [ ! -d "$ACCOUNT_DIR" ]; then
     echo "No such account $ACCOUNT"
     exit 1
   fi
-  
+
   TF_DIR="$ACCOUNT_DIR/.terraform"
-  
+
   if [ ! -d "$TF_DIR/modules" ]; then
     cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-bootstrap" -- terraform get deploy
   fi
-  
+
   STATE_BUCKET=$(aws-vault exec "${ACCOUNT}-bootstrap" -- aws --region $STATE_REGION s3 ls | awk {'print $3'}  | grep nubis-deploy | head)
 
   if [ -z "$STATE_BUCKET" ]; then
     echo "Creating remote state bucket"
-    
+
     STATE_BUCKET="nubis-deploy-$(openssl rand -hex 16)"
-    
+
     aws-vault exec "${ACCOUNT}-bootstrap" -- aws --region $STATE_REGION s3 mb "s3://${STATE_BUCKET}"
   fi
-  
+
   REMOTE_STATE=$(cat "$ACCOUNT_DIR/.terraform/terraform.tfstate" 2>/dev/null | jq -r .remote.config.bucket 2>/dev/null )
-  
+
   #XXX: Check our remote state is what is should be
   if [ -z "$REMOTE_STATE" ]; then
     echo "Setting up remote state"
-    
+
     cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-bootstrap" -- terraform remote config \
       -backend=s3 \
       -backend-config="bucket=$STATE_BUCKET" \
       -backend-config="key=terraform/nubis-deploy" \
       -backend-config="region=$STATE_REGION" \
-     
+
   fi
 
 }
 
 update () {
   echo "Running update for $ACCOUNT in $ACCOUNT_DIR"
-  
+
   git submodule update --remote --recursive "$ACCOUNT_DIR/deploy"
-  
+
   cd $ACCOUNT_DIR && aws-vault exec -n "${ACCOUNT}-bootstrap" -- terraform get -update=true deploy
 }
 
 plan () {
   echo "Running plan for $ACCOUNT in $ACCOUNT_DIR"
-  
+
   cd $ACCOUNT_DIR && aws-vault exec -n "${ACCOUNT}-bootstrap" -- terraform plan -var-file=../../globals/terraform.tfvars -var-file=terraform.tfvars deploy
 }
 
 apply () {
   echo "Running apply for $ACCOUNT in $ACCOUNT_DIR"
-  
+
   cd $ACCOUNT_DIR && aws-vault exec -n "${ACCOUNT}-bootstrap" -- terraform apply -var-file=../../globals/terraform.tfvars -var-file=terraform.tfvars deploy
 }
 
 status () {
   echo "Running outputs for $ACCOUNT in $ACCOUNT_DIR"
-  
+
   cd $ACCOUNT_DIR && aws-vault exec -n "${ACCOUNT}-bootstrap" -- terraform output | sed -e's/^/  /g'
 }
 
@@ -93,14 +93,14 @@ cleanup () {
 
 admins () {
   echo "Showing admins for $ACCOUNT in $ACCOUNT_DIR"
-  
+
   cd $ACCOUNT_DIR && aws-vault exec -n "${ACCOUNT}-bootstrap" -- terraform output | grep admins_ | perl -MJSON -MData::Dumper -ne'/(\S*)\s+=\s+(\S*)/; $i=0 ; foreach my $foo (split(",",$2)) { $info[$i++]{$1} = $foo }; END { print to_json(\@info)}' | jq .
 
 }
 
 taint_admins () {
   echo "Tainting admins for $ACCOUNT in $ACCOUNT_DIR"
-  
+
   for admin in $(cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-bootstrap" -- terraform  show | grep module.global_admins.aws_iam_access_key | cut -d: -f1 | cut -d. -f3- ); do
     cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-bootstrap" -- terraform taint -module=global_admins $admin
   done
