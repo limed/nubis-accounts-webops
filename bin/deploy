@@ -127,6 +127,7 @@ help () {
 
 hash aws 2>/dev/null || message_print CRITICAL "Please install the AWS CLI API to use this build tool. https://aws.amazon.com/cli/"
 hash terraform 2>/dev/null || message_print CRITICAL "Please install packer to use this build tool. https://terraform.io/"
+hash aws-vault 2>/dev/null || message_print CRITICAL "Please install aws-vault to use this build tool. https://github.com/99designs/aws-vault"
 
 case "$1" in
    accounts)
