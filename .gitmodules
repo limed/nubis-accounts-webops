@@ -23,3 +23,6 @@
 	path = accounts/appsvcs-voice/deploy
 	url = http://github.com/nubisproject/nubis-deploy.git
 	branch = develop
+[submodule "accounts/appsvcs-static/deploy"]
+	path = accounts/appsvcs-static/deploy
+	url = http://github.com/nubisproject/nubis-deploy.git
