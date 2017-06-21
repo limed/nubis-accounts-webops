@@ -26,3 +26,6 @@
 [submodule "accounts/appsvcs-generic/deploy"]
 	path = accounts/appsvcs-generic/deploy
 	url = http://github.com/nubisproject/nubis-deploy.git
+[submodule "accounts/appsvcs-static/deploy"]
+	path = accounts/appsvcs-static/deploy
+	url = http://github.com/nubisproject/nubis-deploy.git
