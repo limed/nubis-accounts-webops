@@ -30,6 +30,7 @@ prep () {
     STATE_BUCKET="nubis-deploy-$(openssl rand -hex 16)"
 
     aws-vault exec "${ACCOUNT}-bootstrap" -- aws --region $STATE_REGION s3 mb "s3://${STATE_BUCKET}"
+    aws-vault exec "${ACCOUNT}-bootstrap" -- aws --region $STATE_REGION s3api put-bucket-versioning --bucket "${STATE_BUCKET}" --versioning-configuration Status=Enabled
   fi
 
   REMOTE_STATE=$(cat "$ACCOUNT_DIR/.terraform/terraform.tfstate" 2>/dev/null | jq -r .remote.config.bucket 2>/dev/null )
