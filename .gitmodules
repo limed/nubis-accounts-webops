@@ -29,3 +29,6 @@
 [submodule "accounts/appsvcs-static/deploy"]
 	path = accounts/appsvcs-static/deploy
 	url = http://github.com/nubisproject/nubis-deploy.git
+[submodule "accounts/mozilla-data-analytics/deploy"]
+	path = accounts/mozilla-data-analytics/deploy
+	url = http://github.com/nubisproject/nubis-deploy.git
