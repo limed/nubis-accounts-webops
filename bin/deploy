@@ -23,6 +23,19 @@ prep () {
 
   STATE_BUCKET=$(aws-vault exec "${ACCOUNT}-$USER_PREFIX" -- aws --region $STATE_REGION s3 ls | awk {'print $3'}  | grep nubis-deploy | head)
 
+  STATE_TABLE=$(aws-vault exec "${ACCOUNT}-$USER_PREFIX" -- aws --region $STATE_REGION dynamodb list-tables | jq -r .TableNames | grep nubis-deploy | head)
+
+  if [ -z "$STATE_TABLE" ]; then
+     STATE_TABLE_UUID=$(uuidgen)
+
+     aws-vault exec "${ACCOUNT}-$USER_PREFIX" -- aws dynamodb create-table \
+	--region "$STATE_REGION" \
+	--table-name "nubis-deploy-$STATE_TABLE_UUID" \
+	--attribute-definitions AttributeName=LockID,AttributeType=S \
+	--key-schema AttributeName=LockID,KeyType=HASH \
+	--provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+  fi
+
   if [ -z "$STATE_BUCKET" ]; then
     STATE_BUCKET="nubis-deploy-$(openssl rand -hex 16)"
 
@@ -43,8 +56,9 @@ prep () {
   fi
 
   TF_BACKEND_BUCKET=$(cat "$ACCOUNT_DIR/.terraform/terraform.tfstate" 2>/dev/null | jq -r .backend.config.bucket 2>/dev/null )
+  TF_BACKEND_TABLE=$(cat "$ACCOUNT_DIR/.terraform/terraform.tfstate" 2>/dev/null | jq -r .backend.config.dynamodb_table 2>/dev/null )
 
-  if [ ! -d "$TF_DIR/modules" ] || [ ! -d "$TF_DIR/plugins" ] || [ "$TF_BACKEND_BUCKET" == "null" ] || [ "$TF_BACKEND_BUCKET" == "" ]; then
+  if [ ! -d "$TF_DIR/modules" ] || [ ! -d "$TF_DIR/plugins" ] || [ "$TF_BACKEND_BUCKET" == "null" ] || [ "$TF_BACKEND_BUCKET" == "" ] || [ "$TF_BACKEND_TABLE" == "null" ] || [ "$TF_BACKEND_TABLE" == "" ]; then
     echo "Initializing Terraform"
 
     cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-$USER_PREFIX" -- terraform init \
@@ -53,6 +67,7 @@ prep () {
       -backend-config="region=$STATE_REGION" \
       -backend-config="key=terraform/nubis-deploy" \
       -backend-config="bucket=$STATE_BUCKET" \
+      -backend-config="dynamodb_table=$STATE_TABLE" \
       deploy
 
     if [ "$?" != "0" ]; then
@@ -143,6 +158,7 @@ help () {
 
 hash aws 2>/dev/null || message_print CRITICAL "Please install the AWS CLI API to use this build tool. https://aws.amazon.com/cli/"
 hash terraform 2>/dev/null || message_print CRITICAL "Please install packer to use this build tool. https://terraform.io/"
+hash aws-vault 2>/dev/null || message_print CRITICAL "Please install aws-vault to use this build tool. https://github.com/99designs/aws-vault"
 
 case "$1" in
    accounts)
