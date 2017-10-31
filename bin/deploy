@@ -81,7 +81,7 @@ prep () {
 update () {
   echo "Running update for $ACCOUNT in $ACCOUNT_DIR"
 
-  git submodule update --remote --recursive "$ACCOUNT_DIR/deploy"
+  #git submodule update --remote --recursive "$ACCOUNT_DIR/deploy"
 
   cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-$USER_PREFIX" -- terraform init -backend=false -input=false -upgrade=true deploy
 }
