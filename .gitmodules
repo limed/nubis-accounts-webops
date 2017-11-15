@@ -1,11 +1,5 @@
-[submodule "accounts/planet/deploy"]
-	path = accounts/planet/deploy
-	url = https://github.com/nubisproject/nubis-deploy.git
 [submodule "accounts/tlscanary/deploy"]
 	path = accounts/tlscanary/deploy
-	url = https://github.com/nubisproject/nubis-deploy.git
-[submodule "accounts/virtual-redirects/deploy"]
-	path = accounts/virtual-redirects/deploy
 	url = https://github.com/nubisproject/nubis-deploy.git
 [submodule "accounts/appsvcs-pastebin/deploy"]
   path = accounts/appsvcs-pastebin/deploy
