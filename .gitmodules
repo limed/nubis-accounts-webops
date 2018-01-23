@@ -1,6 +1,3 @@
-[submodule "accounts/tlscanary/deploy"]
-	path = accounts/tlscanary/deploy
-	url = https://github.com/nubisproject/nubis-deploy.git
 [submodule "accounts/appsvcs-securitywiki/deploy"]
 	path = accounts/appsvcs-securitywiki/deploy
 	url = http://github.com/nubisproject/nubis-deploy.git
