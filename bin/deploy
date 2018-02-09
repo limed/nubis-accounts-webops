@@ -89,13 +89,13 @@ update () {
 plan () {
   echo "Running plan for $ACCOUNT in $ACCOUNT_DIR"
 
-  cd $ACCOUNT_DIR && aws-vault exec "${ACCOUNT}-$USER_PREFIX" -- terraform plan -input=false -var-file=../../globals/terraform.tfvars -var-file=terraform.tfvars deploy
+  cd $ACCOUNT_DIR && aws-vault exec --assume-role-ttl=60m "${ACCOUNT}-$USER_PREFIX" -- terraform plan -input=false -var-file=../../globals/terraform.tfvars -var-file=terraform.tfvars deploy
 }
 
 apply () {
   echo "Running apply for $ACCOUNT in $ACCOUNT_DIR"
 
-  cd $ACCOUNT_DIR && aws-vault exec --assume-role-ttl=60m "${ACCOUNT}-$USER_PREFIX" -- terraform apply -input=false -var-file=../../globals/terraform.tfvars -var-file=terraform.tfvars deploy
+  cd $ACCOUNT_DIR && aws-vault exec --assume-role-ttl=60m "${ACCOUNT}-$USER_PREFIX" -- terraform apply -auto-approve=true -input=false -var-file=../../globals/terraform.tfvars -var-file=terraform.tfvars deploy
 }
 
 status () {
