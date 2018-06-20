@@ -1,6 +1,3 @@
-[submodule "accounts/appsvcs-phonebook/deploy"]
-	path = accounts/appsvcs-phonebook/deploy
-	url = http://github.com/nubisproject/nubis-deploy.git
 [submodule "accounts/appsvcs-voice/deploy"]
 	path = accounts/appsvcs-voice/deploy
 	url = http://github.com/nubisproject/nubis-deploy.git
